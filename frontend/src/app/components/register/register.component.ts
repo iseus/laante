@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -12,9 +12,13 @@ export class RegisterComponent {
 
   constructor(private authService: AuthService, private router: Router) {}
 
-  register() {
-    this.authService.register(this.user).subscribe(() => {
+  async register() {
+    try {
+      await this.authService.register(this.user);
       this.router.navigate(['/login']);
-    });
+    } catch (error) {
+      console.error('Registration failed:', error);
+      // Handle registration error (e.g., show error message to the user)
+    }
   }
 }

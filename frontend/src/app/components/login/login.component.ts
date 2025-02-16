@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -12,9 +12,13 @@ export class LoginComponent {
 
   constructor(private authService: AuthService, private router: Router) {}
 
-  login() {
-    this.authService.login(this.credentials).subscribe(() => {
+  async login() {
+    try {
+      await this.authService.login(this.credentials);
       this.router.navigate(['/']);
-    });
+    } catch (error) {
+      console.error('Login failed:', error);
+      // Handle login error (e.g., show error message to the user)
+    }
   }
 }

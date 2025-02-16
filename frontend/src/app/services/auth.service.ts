@@ -1,65 +1,64 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import axios from 'axios';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+
+axios.defaults.baseURL = 'http://localhost:8000/api';
+axios.defaults.withCredentials = true;
+axios.defaults.withXSRFToken = true;
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private apiUrl = 'http://localhost:8000/api';
-  private csrfToken: string | null = null;
+  private token: string = '';
 
-  constructor(private http: HttpClient, private router: Router) {
-    this.getCsrfToken();
-  }
+  constructor(private router: Router) {}
 
-  private getCsrfToken() {
-    this.http.get(`${this.apiUrl}/sanctum/csrf-cookie`, { withCredentials: true }).subscribe(() => {
-      this.csrfToken = this.getCookie('XSRF-TOKEN');
-    });
-  }
-
-  private getCookie(name: string): string | null {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+  async login(credentials: any) {
+    try {
+      const response = await axios.post(`${this.apiUrl}/sanctum/token`, {
+        ...credentials,
+        device_name: 'web'
+      });
+      this.token = response.data;
+      localStorage.setItem('token', this.token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
+      this.router.navigate(['/']);
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
     }
-    return null;
   }
 
-  register(user: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, user, {
-      headers: new HttpHeaders({
-        'X-XSRF-TOKEN': this.csrfToken || ''
-      }),
-      withCredentials: true
-    });
+  async register(user: any) {
+    try {
+      await axios.post(`${this.apiUrl}/register`, user);
+      this.router.navigate(['/login']);
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
   }
 
-  login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials, {
-      headers: new HttpHeaders({
-        'X-XSRF-TOKEN': this.csrfToken || ''
-      }),
-      withCredentials: true
-    });
+  async logout() {
+    try {
+      await axios.post(`${this.apiUrl}/logout`, {}, {
+        headers: {
+          'Authorization': `Bearer ${this.token}`
+        }
+      });
+      this.token = '';
+      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
+      this.router.navigate(['/login']);
+    } catch (error) {
+      console.error('Logout failed:', error);
+      throw error;
+    }
   }
 
-  logout(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/logout`, {}, {
-      headers: new HttpHeaders({
-        'X-XSRF-TOKEN': this.csrfToken || ''
-      }),
-      withCredentials: true
-    }).pipe(
-      tap(() => {
-        this.csrfToken = null;
-      })
-    );
+  isAuthenticated(): boolean {
+    return !!localStorage.getItem('token');
   }
 }
