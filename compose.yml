@@ -15,8 +15,6 @@ services:
       - DB_DATABASE=laante
       - DB_USERNAME=laante
       - DB_PASSWORD=laante12345
-    volumes:
-      - ./backend:/var/www
     depends_on:
       - pdb
     networks:
@@ -29,9 +27,6 @@ services:
     image: laante_frontend
     ports:
       - "4200:4200"
-    volumes:
-      - ./frontend:/usr/src/app
-    command: ng serve --host 0.0.0.0
     networks:
       - laante
 
