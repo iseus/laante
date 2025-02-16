@@ -4,7 +4,7 @@ WORKDIR /var/www
 
 COPY . .
 
-RUN npm install -g @angular/cli
+RUN npm install -g @angular/cli@17
 
 RUN npm install
 
