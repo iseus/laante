@@ -43,14 +43,14 @@ export class AuthService {
 
   async logout() {
     try {
-      await axios.post(`${this.apiUrl}/logout`, {}, {
+      const token = localStorage.getItem('token');
+      await axios.post('/logout', {}, {
         headers: {
-          'Authorization': `Bearer ${this.token}`
+          'Authorization': `Bearer ${token}`
         }
       });
-      this.token = '';
       localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
+      localStorage.removeItem('user');
       this.router.navigate(['/login']);
     } catch (error) {
       console.error('Logout failed:', error);
