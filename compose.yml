@@ -1,0 +1,65 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend/Dockerfile
+    image: laante_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=pgsql
+      - DB_HOST=pdb
+      - DB_PORT=5432
+      - DB_DATABASE=laante
+      - DB_USERNAME=laante
+      - DB_PASSWORD=laante12345
+    volumes:
+      - ./backend:/var/www
+    depends_on:
+      - pdb
+    networks:
+      - laante
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend/Dockerfile
+    image: laante_frontend
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend:/usr/src/app
+    command: ng serve --host 0.0.0.0
+    networks:
+      - laante
+
+  pdb:
+    build: 
+      context: ./docker/pdb
+    restart: always
+    shm_size: 256mb
+    environment:
+      POSTGRES_DB: laante
+      POSTGRES_USER: laante
+      POSTGRES_PASSWORD: laante12345
+      PGUSER: laante
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U", "laante"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    networks:
+      - laante
+
+volumes:
+  pgdata:
+
+networks:
+  laante:
+    driver: bridge
