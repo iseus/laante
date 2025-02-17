@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
         try {
             //Validated
@@ -30,7 +31,7 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            $user = User::create([
+            User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password)
@@ -49,7 +50,7 @@ class AuthController extends Controller
         }
     }
 
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         try {
             $validateUser = Validator::make($request->all(),
@@ -90,7 +91,7 @@ class AuthController extends Controller
         }
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         try {
             $request->user()->tokens()->delete();
@@ -108,7 +109,7 @@ class AuthController extends Controller
         }
     }
 
-    public function user(Request $request)
+    public function user(Request $request): JsonResponse
     {
         try {
             $user = $request->user();
