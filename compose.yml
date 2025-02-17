@@ -1,8 +1,9 @@
 services:
   backend:
     build:
-      context: ./backend
-      dockerfile: ../docker/backend/Dockerfile
+      context: ./docker/backend
+      dockerfile: Dockerfile
+      target: dev
     image: laante_backend
     ports:
       - "8000:8000"
@@ -16,9 +17,7 @@ services:
       - DB_USERNAME=laante
       - DB_PASSWORD=laante12345
     volumes:
-      - type: bind
-        source: ./
-        target: /var/www
+      - ./:/var/www
     depends_on:
       - pdb
     networks:
@@ -26,15 +25,14 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: ../docker/frontend/Dockerfile
+      context: ./docker/frontend
+      dockerfile: Dockerfile
+      target: dev
     image: laante_frontend
     ports:
       - "4200:4200"
     volumes:
-      - type: bind
-        source: ./
-        target: /var/www
+      - ./:/var/www
     networks:
       - laante
 
