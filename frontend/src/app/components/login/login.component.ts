@@ -15,7 +15,6 @@ export class LoginComponent {
   async login() {
     try {
       await this.authService.login(this.credentials);
-      this.router.navigate(['/']);
     } catch (error) {
       console.error('Login failed:', error);
       // Handle login error (e.g., show error message to the user)

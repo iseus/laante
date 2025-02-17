@@ -15,7 +15,6 @@ export class RegisterComponent {
   async register() {
     try {
       await this.authService.register(this.user);
-      this.router.navigate(['/login']);
     } catch (error) {
       console.error('Registration failed:', error);
       // Handle registration error (e.g., show error message to the user)

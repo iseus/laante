@@ -1,30 +1,52 @@
 import { Injectable } from '@angular/core';
-import axios from 'axios';
+import axios from 'axios-observable';
 import { Router } from '@angular/router';
+import { CookieService } from 'ngx-cookie-service';
 
 axios.defaults.baseURL = 'http://localhost:8000/api';
 axios.defaults.withCredentials = true;
 axios.defaults.withXSRFToken = true;
+axios.defaults.xsrfCookieName = 'XSRF-TOKEN';
+axios.defaults.xsrfHeaderName = 'X-Xsrf-Token';
+
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401 && error.response.data.message === 'Unauthenticated.') {
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8000/api';
-  private token: string = '';
+  constructor(private router: Router, private cookieService: CookieService) {
+    if (!localStorage.getItem('token')) {
+      this.getCsrfToken();
+    }
+  }
 
-  constructor(private router: Router) {}
+  private async getCsrfToken() {
+    try {
+      await axios.get('/token').subscribe(response => {
+        const cookieValue = this.cookieService.get('XSRF-TOKEN');
+        localStorage.setItem('token', cookieValue);
+      });
+    } catch (error) {
+      console.error('Failed to get CSRF token:', error);
+    }
+  }
 
   async login(credentials: any) {
     try {
-      const response = await axios.post(`${this.apiUrl}/sanctum/token`, {
-        ...credentials,
-        device_name: 'web'
+      await axios.post('/login', credentials).subscribe(response => {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        this.router.navigate(['/profile']);
       });
-      this.token = response.data;
-      localStorage.setItem('token', this.token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
-      this.router.navigate(['/']);
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -33,8 +55,9 @@ export class AuthService {
 
   async register(user: any) {
     try {
-      await axios.post(`${this.apiUrl}/register`, user);
-      this.router.navigate(['/login']);
+      await axios.post('/register', user).subscribe(response => {
+        this.router.navigate(['/login']);
+      });
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;
@@ -43,15 +66,12 @@ export class AuthService {
 
   async logout() {
     try {
-      const token = localStorage.getItem('token');
-      await axios.post('/logout', {}, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      await axios.post('/logout', {}, {}).subscribe(() => {
+        localStorage.removeItem('user');
+        const cookieValue = this.cookieService.get('XSRF-TOKEN');
+        localStorage.setItem('token', cookieValue);
+        this.router.navigate(['/login']);
       });
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      this.router.navigate(['/login']);
     } catch (error) {
       console.error('Logout failed:', error);
       throw error;
@@ -59,6 +79,10 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+    return !!localStorage.getItem('user');
+  }
+
+  getUserDetails() {
+    return JSON.parse(localStorage.getItem('user') || '{}');
   }
 }

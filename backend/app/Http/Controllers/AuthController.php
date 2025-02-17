@@ -20,7 +20,6 @@ class AuthController extends Controller
                 'name' => 'required',
                 'email' => 'required|email|unique:users,email',
                 'password' => 'required',
-                'device_name' => 'required|string'
             ]);
 
             if($validateUser->fails()){
@@ -57,7 +56,6 @@ class AuthController extends Controller
             [
                 'email' => 'required|email',
                 'password' => 'required',
-                'device_name' => 'required|string'
             ]);
 
             if($validateUser->fails()){
@@ -80,7 +78,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'User Logged In Successfully',
-                'token' => $user->createToken($request->device_name)->plainTextToken
+                'user' => $user
             ], 200);
 
         } catch (\Throwable $th) {
@@ -94,29 +92,12 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         try {
-            $request->user()->tokens()->delete();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
 
             return response()->json([
                 'status' => true,
                 'message' => 'User Logged Out Successfully'
-            ], 200);
-
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => $th->getMessage()
-            ], 500);
-        }
-    }
-
-    public function user(Request $request): JsonResponse
-    {
-        try {
-            $user = $request->user();
-
-            return response()->json([
-                'status' => true,
-                'user' => $user,
             ], 200);
 
         } catch (\Throwable $th) {
