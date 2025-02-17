@@ -25,14 +25,6 @@ export class CsrfInterceptor implements HttpInterceptor {
             })
           );
         }
-        if (error.status === 401) {
-          // Unauthorized, log the user out
-          this.authService.logout().subscribe({
-            next: () => {
-              window.location.href = '/login';
-            },
-          });
-        }
         return throwError(error);
       })
     );

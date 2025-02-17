@@ -19,7 +19,7 @@ class AuthController extends Controller
             [
                 'name' => 'required',
                 'email' => 'required|email|unique:users,email',
-                'password' => 'required',
+                'password' => 'required|confirmed',
             ]);
 
             if($validateUser->fails()){
@@ -27,7 +27,7 @@ class AuthController extends Controller
                     'status' => false,
                     'message' => 'validation error',
                     'errors' => $validateUser->errors()
-                ], 401);
+                ], 422);
             }
 
             User::create([
