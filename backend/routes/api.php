@@ -7,7 +7,7 @@ use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/token', [CsrfCookieController::class, 'show']);
+    Route::get('/token', [AuthController::class, 'token']);
 });
 
 Route::middleware(['auth:sanctum', 'throttle:6,1'])->group(function () {

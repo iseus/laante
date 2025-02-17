@@ -10,11 +10,11 @@ import { Router } from '@angular/router';
 export class HeaderComponent {
   constructor(public authService: AuthService, private router: Router) {}
 
-  logout() {
-    this.authService.logout().then(() => {
-      this.router.navigate(['/login']);
-    }).catch(error => {
-      console.error('Logout failed:', error);
+  async logout() {
+    await this.authService.logout().subscribe({
+      next: (response) => {
+        this.router.navigate(['/login']);
+      }
     });
   }
 }

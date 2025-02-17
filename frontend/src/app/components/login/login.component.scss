@@ -36,3 +36,14 @@ button {
 button:hover {
   background-color: #0056b3;
 }
+
+.error-message {
+  color: red;
+  margin-top: 1rem;
+}
+
+.field-error {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}

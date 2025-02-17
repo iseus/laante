@@ -9,15 +9,22 @@ import { AuthService } from '../../services/auth.service';
 })
 export class RegisterComponent {
   user = { name: '', email: '', password: '', password_confirmation: '' };
+  fieldErrors: { [key: string]: string } = {};
 
   constructor(private authService: AuthService, private router: Router) {}
 
   async register() {
-    try {
-      await this.authService.register(this.user);
-    } catch (error) {
-      console.error('Registration failed:', error);
-      // Handle registration error (e.g., show error message to the user)
-    }
+    await this.authService.register(this.user).subscribe({
+      next: (response) => {
+        this.router.navigate(['/login']);
+      },
+      error: (error: any) => {
+        if (error && error.status === 422) {
+          this.fieldErrors = error.error.errors;
+        } else {
+          this.fieldErrors = {};
+        }
+      },
+    });
   }
 }

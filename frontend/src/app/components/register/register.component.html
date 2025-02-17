@@ -1,21 +1,26 @@
+<!-- filepath: /home/iseus/workspace/devblog/laante/frontend/src/app/components/register/register.component.html -->
 <div class="register-container">
   <h2>Register</h2>
   <form (ngSubmit)="register()">
     <div class="form-group">
       <label for="name">Name</label>
       <input type="text" id="name" [(ngModel)]="user.name" name="name" required>
+      <div *ngIf="fieldErrors['name']" class="field-error">{{ fieldErrors['name'] }}</div>
     </div>
     <div class="form-group">
       <label for="email">Email</label>
       <input type="email" id="email" [(ngModel)]="user.email" name="email" required>
+      <div *ngIf="fieldErrors['email']" class="field-error">{{ fieldErrors['email'] }}</div>
     </div>
     <div class="form-group">
       <label for="password">Password</label>
       <input type="password" id="password" [(ngModel)]="user.password" name="password" required>
+      <div *ngIf="fieldErrors['password']" class="field-error">{{ fieldErrors['password'] }}</div>
     </div>
     <div class="form-group">
       <label for="password_confirmation">Confirm Password</label>
       <input type="password" id="password_confirmation" [(ngModel)]="user.password_confirmation" name="password_confirmation" required>
+      <div *ngIf="fieldErrors['password_confirmation']" class="field-error">{{ fieldErrors['password_confirmation'] }}</div>
     </div>
     <button type="submit">Register</button>
   </form>

@@ -63,7 +63,7 @@ class AuthController extends Controller
                     'status' => false,
                     'message' => 'validation error',
                     'errors' => $validateUser->errors()
-                ], 401);
+                ], 422);
             }
 
             if(!Auth::attempt($request->only(['email', 'password']))){
@@ -106,5 +106,13 @@ class AuthController extends Controller
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function token(Request $request): JsonResponse
+    {
+        return response()->json([
+            'status' => true,
+            'message' => 'Token Fetched Successfully',
+        ]);
     }
 }

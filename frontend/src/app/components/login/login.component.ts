@@ -9,15 +9,25 @@ import { AuthService } from '../../services/auth.service';
 })
 export class LoginComponent {
   credentials = { email: '', password: '' };
+  errorMessage: string | null = null;
+  fieldErrors: { [key: string]: string } = {};
 
   constructor(private authService: AuthService, private router: Router) {}
 
   async login() {
-    try {
-      await this.authService.login(this.credentials);
-    } catch (error) {
-      console.error('Login failed:', error);
-      // Handle login error (e.g., show error message to the user)
-    }
+    await this.authService.login(this.credentials).subscribe({
+      next: (response) => {
+        this.router.navigate(['/profile']);
+      },
+      error: (error: any) => {
+        if (error && error.status === 422) {
+          this.fieldErrors = error.error.errors;
+          this.errorMessage = null;
+        } else {
+          this.errorMessage = 'Login failed. Please check your credentials and try again.';
+          this.fieldErrors = {};
+        }
+      },
+    });
   }
 }
