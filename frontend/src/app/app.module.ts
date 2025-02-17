@@ -12,6 +12,7 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { HomeComponent } from './components/home/home.component';
 import { AuthGuard } from './guards/auth.guard';
 import { CsrfInterceptor } from './services/csrf-interceptor';
+import { HeaderInterceptor } from './services/header-interceptor';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { CsrfInterceptor } from './services/csrf-interceptor';
   ],
   providers: [
     AuthGuard,
-    { provide: HTTP_INTERCEPTORS, useClass: CsrfInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: CsrfInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: HeaderInterceptor, multi: true },
   ],
   bootstrap: [
     AppComponent,

@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -12,11 +11,10 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private router: Router,
   ) {}
 
   refreshCsrfToken(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/token`, {withCredentials: true}).pipe(
+    return this.http.get(`${this.apiUrl}/token`).pipe(
       catchError(error => {
         console.error('Failed to get CSRF token:', error);
         return throwError(error);
@@ -25,31 +23,31 @@ export class AuthService {
   }
 
   login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials, {withCredentials: true}).pipe(
+    return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
       map((response: any) => {
-        localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('token', response.token);
         return response;
       }),
     );
   }
 
   register(user: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, user, {withCredentials: true});
+    return this.http.post(`${this.apiUrl}/register`, user);
+  }
+
+  getUserDetails(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/user`);
   }
 
   logout(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/logout`, {}, {withCredentials: true}).pipe(
+    return this.http.post(`${this.apiUrl}/logout`, null).pipe(
       map(() => {
-        localStorage.removeItem('user');
+        localStorage.clear();
       }),
     );
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('user');
-  }
-
-  getUserDetails(): any {
-    return JSON.parse(localStorage.getItem('user') || '{}');
+    return !!localStorage.getItem('token');
   }
 }

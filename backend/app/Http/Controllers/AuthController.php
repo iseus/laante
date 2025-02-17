@@ -78,7 +78,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'User Logged In Successfully',
-                'user' => $user
+                'token' => $user->createToken('token')->plainTextToken
             ], 200);
 
         } catch (\Throwable $th) {
@@ -93,7 +93,9 @@ class AuthController extends Controller
     {
         try {
             $request->session()->invalidate();
-            $request->session()->regenerateToken();
+            $request->user()->tokens()->each(function($token, $key) {
+                $token->delete();
+            });
 
             return response()->json([
                 'status' => true,
@@ -112,7 +114,16 @@ class AuthController extends Controller
     {
         return response()->json([
             'status' => true,
-            'message' => 'Token Fetched Successfully',
+            'message' => 'CSRF Cookie Set Successfully'
+        ]);
+    }
+
+    public function user(Request $request): JsonResponse
+    {
+        return response()->json([
+            'status' => true,
+            'message' => 'User Fetched Successfully',
+            'user' => $request->user()
         ]);
     }
 }

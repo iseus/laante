@@ -12,7 +12,6 @@ export class CsrfInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 419) {
-          console.log('CSRF token mismatch, refreshing the token and retrying the request');
           // CSRF token mismatch, refresh the token and retry the request
           return this.authService.refreshCsrfToken().pipe(
             switchMap(() => {
@@ -25,6 +24,14 @@ export class CsrfInterceptor implements HttpInterceptor {
               return throwError(err);
             })
           );
+        }
+        if (error.status === 401) {
+          // Unauthorized, log the user out
+          this.authService.logout().subscribe({
+            next: () => {
+              window.location.href = '/login';
+            },
+          });
         }
         return throwError(error);
       })
