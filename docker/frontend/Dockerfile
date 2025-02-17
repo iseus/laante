@@ -1,12 +1,8 @@
 FROM node:alpine
 
-WORKDIR /var/www
-
-COPY . .
+WORKDIR /var/www/frontend
 
 RUN npm install -g @angular/cli@17
-
-RUN npm install
 
 EXPOSE 4200
 
